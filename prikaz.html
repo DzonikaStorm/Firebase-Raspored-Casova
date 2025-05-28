@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Prikaz rasporeda</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <style>
+    body { font-family: Arial; padding: 2rem; }
+    table, th, td { border: 1px solid black; border-collapse: collapse; }
+    th, td { padding: 8px; text-align: center; }
+    th { background-color: #eee; }
+  </style>
+</head>
+<body>
+
+  <h2>Raspored casova</h2>
+
+  <label>Odaberi odjeljenje:</label>
+  <select id="odjeljenje" onchange="ucitajRaspored()">
+    <option value="S3C">S3C</option>
+  </select>
+
+  <table id="raspored" style="margin-top: 1rem;">
+    <thead>
+      <tr>
+        <th>Cas</th>
+        <th>Ponedjeljak</th>
+        <th>Utorak</th>
+        <th>Srijeda</th>
+        <th>Cetvrtak</th>
+        <th>Petak</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <script>
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZw91WBTwIbk1vEdUMlRw4ohc9dZdptCY",
+        authDomain: "raspored-1ad8d.firebaseapp.com",
+        projectId: "raspored-1ad8d",
+        storageBucket: "raspored-1ad8d.firebasestorage.app",
+        messagingSenderId: "573088269470",
+        appId: "1:573088269470:web:9d20ca89243cf71271e78f",
+        measurementId: "G-108EJ5DE6H"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function ucitajRaspored() {
+      const odjeljenje = document.getElementById("odjeljenje").value;
+      const tabela = document.querySelector("#raspored tbody");
+
+      tabela.innerHTML = "";
+      const raspored = Array.from({ length: 6 }, () => Array(5).fill(""));
+
+      const snapshot = await db.collection("raspored")
+        .where("odjeljenjeId", "==", odjeljenje)
+        .get();
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const casIndex = parseInt(data.cas) - 1;
+        const danIndex = parseInt(data.danNedelje) - 1;
+        raspored[casIndex][danIndex] = `${data.predmet} (${data.nastavnik})`;
+      });
+
+      for (let i = 0; i < 6; i++) {
+        const row = document.createElement("tr");
+        const casCell = document.createElement("td");
+        casCell.textContent = i + 1;
+        row.appendChild(casCell);
+
+        for (let j = 0; j < 5; j++) {
+          const cell = document.createElement("td");
+          cell.textContent = raspored[i][j];
+          row.appendChild(cell);
+        }
+
+        tabela.appendChild(row);
+      }
+    }
+
+    window.onload = ucitajRaspored;
+  </script>
+
+</body>
+</html>
