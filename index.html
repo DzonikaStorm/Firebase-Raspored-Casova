@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Raspored casova</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+<body style="font-family: Arial; padding: 2rem;">
+
+  <h2>Unos casa u raspored</h2>
+
+  <label>Odjeljenje:</label>
+  <select id="odjeljenje">
+    <option value="S3C">S3C</option>
+  </select><br><br>
+
+  <label>Cas (1-7):</label>
+  <input type="number" id="cas"><br><br>
+  
+    <script>
+
+        document.getElementById("cas").addEventListener("input", function() {
+        const value = parseInt(this.value);
+        if (value < 1 || value > 7) {
+            this.setCustomValidity("Unesite broj izmedju 1 i 7.");
+        } else {
+            this.setCustomValidity("");
+        }
+        });
+    </script>
+
+  <label>Dan:</label>
+  <select id="dan">
+    <option value="1">Ponedjeljak</option>
+    <option value="2">Utorak</option>
+    <option value="3">Srijeda</option>
+    <option value="4">Cetvrtak</option>
+    <option value="5">Petak</option>
+  </select><br><br>
+
+  <label>Predmet:</label>
+  <input type="text" id="predmet"><br><br>
+
+  <label>Nastavnik:</label>
+  <input type="text" id="nastavnik"><br><br>
+
+  <button onclick="dodajCas()">Dodaj cas</button>
+
+  <p id="status"></p>
+
+  <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZw91WBTwIbk1vEdUMlRw4ohc9dZdptCY",
+        authDomain: "raspored-1ad8d.firebaseapp.com",
+        projectId: "raspored-1ad8d",
+        storageBucket: "raspored-1ad8d.firebasestorage.app",
+        messagingSenderId: "573088269470",
+        appId: "1:573088269470:web:9d20ca89243cf71271e78f",
+        measurementId: "G-108EJ5DE6H"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function dodajCas() {
+      const cas = parseInt(document.getElementById("cas").value);
+      const dan = parseInt(document.getElementById("dan").value);
+      const predmet = document.getElementById("predmet").value;
+      const nastavnik = document.getElementById("nastavnik").value;
+      const odjeljenje = document.getElementById("odjeljenje").value;
+
+      if (!cas || !predmet || !nastavnik) {
+        document.getElementById("status").innerText = "Popuni sva polja";
+        return;
+      }
+
+      try {
+        await db.collection("raspored").add({
+          cas,
+          danNedelje: dan,
+          nastavnik,
+          odjeljenjeId: odjeljenje,
+          predmet
+        });
+        document.getElementById("status").innerText = "cas uspjesno dodat";
+      } catch (err) {
+        document.getElementById("status").innerText = "Greska: " + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
